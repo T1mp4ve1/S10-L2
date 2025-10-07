@@ -1,18 +1,14 @@
-import { Component } from "react";
+import { useState, useEffect } from "react";
 import CommentsList from "./CommentsList";
 import AddComment from "./AddComment";
-// import AddComment from "./AddComment";
 
-class CommentArea extends Component {
-  state = {
-    comments: [],
-  };
+const CommentArea = ({ asin }) => {
+  const [comments, setComments] = useState([]);
 
-  fetchComments = async () => {
+  const fetchComments = async () => {
     try {
       const res = await fetch(
-        "https://striveschool-api.herokuapp.com/api/comments/" +
-          this.props.asin,
+        "https://striveschool-api.herokuapp.com/api/comments/" + asin,
         {
           headers: {
             Authorization:
@@ -21,9 +17,9 @@ class CommentArea extends Component {
         }
       );
       if (res.ok) {
-        const datarecived = await res.json();
-        this.setState({ comments: datarecived });
-        console.log(datarecived);
+        const dataRecived = await res.json();
+        setComments(dataRecived);
+        console.log("Commenti recevuti", dataRecived);
       } else {
         throw new Error("Errore nei dati");
       }
@@ -32,24 +28,16 @@ class CommentArea extends Component {
     }
   };
 
-  componentDidMount() {
-    this.fetchComments();
-  }
+useEffect(() => {
+  fetchComments();
+}, [asin])
 
-  componentDidUpdate(prevProps) {
-    if (prevProps.asin !== this.props.asin) {
-      this.fetchComments();
-    }
-  }
-
-  render() {
-    return (
-      <div id="commentArea" className="text-light p-2 sticky-top">
-        <h3>Commenti del libro selezionato:</h3>
-        <CommentsList comments={this.state.comments} />
-        <AddComment asin={this.props.asin} />
-      </div>
-    );
-  }
-}
+  return (
+    <div id="commentArea" className="text-light p-2 sticky-top">
+      <h3>Commenti del libro selezionato:</h3>
+      <CommentsList comments={comments} />
+      <AddComment asin={asin} />
+    </div>
+  );
+};
 export default CommentArea;
